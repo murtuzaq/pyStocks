@@ -24,18 +24,26 @@ class StockInfo:
         return self.__df["Volume"]
 
 
+class StockView:
+    def __init__(self, stockinfo=None):
+        self.__stockinfo = stockinfo
+
+    def show_stock_graph(self):
+        ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan=5, colspan=1)
+        ax2 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1, sharex=ax1)
+
+        ax1.plot(self.__stockinfo.get_closing_price())
+        ax1.plot(self.__stockinfo.get_moving_average())
+        ax2.plot(self.__stockinfo.get_volume())
+
+        plt.show()
+
 
 def main():
     stock = StockInfo("MSFT")
+    view = StockView(stockinfo=stock)
 
-    ax1 = plt.subplot2grid((6, 1), (0, 0), rowspan=5, colspan=1)
-    ax2 = plt.subplot2grid((6, 1), (5, 0), rowspan=1, colspan=1, sharex=ax1)
-
-    ax1.plot(stock.get_closing_price())
-    ax1.plot(stock.get_moving_average())
-    ax2.plot(stock.get_volume())
-
-    plt.show()
+    view.show_stock_graph()
 
 
 if __name__ == '__main__':
