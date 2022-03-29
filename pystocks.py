@@ -1,6 +1,12 @@
 import pandas_datareader
 import datetime
 import matplotlib.pyplot as plt
+import bs4 as bs
+import pickle
+import requests
+import os
+
+SP500_STOCKS_FILE = "sp500_stocks.txt"
 
 
 class StockInfo:
@@ -39,11 +45,40 @@ class StockView:
         plt.show()
 
 
+def get_sp500_stocks():
+    stocks = []
+
+    if os.path.isfile(SP500_STOCKS_FILE):
+        with open(SP500_STOCKS_FILE) as file:
+            for line in file:
+                stocks.append(line.strip())
+        return stocks
+
+    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
+    soup = bs.BeautifulSoup(resp.text, 'lxml')
+    table = soup.find('table', {'class': 'wikitable sortable'})
+
+    for row in table.findAll('tr')[1:]:
+        ticker = row.findAll('td')[0].text
+        stocks.append(ticker.strip())
+
+    file = open(SP500_STOCKS_FILE, "w")
+    for stock in stocks:
+        file.write(stock + '\n')
+
+    return stocks
+
+
 def main():
     stock = StockInfo("MSFT")
     view = StockView(stockinfo=stock)
 
-    view.show_stock_graph()
+    #view.show_stock_graph()
+
+    stocks = get_sp500_stocks()
+
+    for stock in stocks:
+        print(stock)
 
 
 if __name__ == '__main__':
