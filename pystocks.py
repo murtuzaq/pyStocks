@@ -5,8 +5,10 @@ import bs4 as bs
 import pickle
 import requests
 import os
+from enum import Enum
 
-SP500_STOCKS_FILE = "sp500_stocks.txt"
+STOCK_TYPE_SP500 = 0
+STOCK_TOTAL_TYPE = 1
 
 
 class StockInfo:
@@ -43,42 +45,70 @@ class StockView:
         ax2.plot(self.__stockinfo.get_volume())
 
         plt.show()
+        return
 
 
-def get_sp500_stocks():
-    stocks = []
+class StockList:
+    def __init__(self):
+        self.__stock_list_type = ['sp500']
+        self.__stock_list_link = ['http://en.wikipedia.org/wiki/List_of_S%26P_500_companies']
+        self.__stock_list_file = ['sp500_stocks.txt']
+        self.__stock_sp500 = []
 
-    if os.path.isfile(SP500_STOCKS_FILE):
-        with open(SP500_STOCKS_FILE) as file:
+        self.__get_sp500_list()
+
+    def get_sp500_stocks(self):
+        return self.__stock_sp500
+
+    def __get_sp500_list(self):
+        if self.__does_sp500_file_exist():
+            self.__get_sp500_list_from_file()
+            return
+
+        self.__get_sp500_list_from_website()
+        self.__write_sp500_list_to_file()
+        return
+
+    def __does_sp500_file_exist(self):
+        sp500_txt_file = self.__stock_list_file[STOCK_TYPE_SP500]
+        if os.path.isfile(sp500_txt_file):
+            return True
+        return False
+
+    def __get_sp500_list_from_file(self):
+        sp500_txt_file = self.__stock_list_file[STOCK_TYPE_SP500]
+        with open(sp500_txt_file) as file:
             for line in file:
-                stocks.append(line.strip())
-        return stocks
+                self.__stock_sp500.append(line.strip())
+        return
 
-    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
-    soup = bs.BeautifulSoup(resp.text, 'lxml')
-    table = soup.find('table', {'class': 'wikitable sortable'})
+    def __get_sp500_list_from_website(self):
+        sp500_data_website = self.__stock_list_link[STOCK_TYPE_SP500]
+        resp = requests.get(sp500_data_website)
+        soup = bs.BeautifulSoup(resp.text, 'lxml')
+        table = soup.find('table', {'class': 'wikitable sortable'})
 
-    for row in table.findAll('tr')[1:]:
-        ticker = row.findAll('td')[0].text
-        stocks.append(ticker.strip())
+        for row in table.findAll('tr')[1:]:
+            stock = row.findAll('td')[0].text
+            self.__stock_sp500.append(stock.strip())
+        return
 
-    file = open(SP500_STOCKS_FILE, "w")
-    for stock in stocks:
-        file.write(stock + '\n')
-
-    return stocks
+    def __write_sp500_list_to_file(self):
+        sp500_txt_file = self.__stock_list_file[STOCK_TYPE_SP500]
+        file = open(sp500_txt_file, "w")
+        for stock in self.__stock_sp500:
+            file.write(stock + '\n')
 
 
 def main():
-    stock = StockInfo("MSFT")
+    stock_list = StockList()
+    stocks = stock_list.get_sp500_stocks()
+
+    stock = StockInfo(stocks[55])
     view = StockView(stockinfo=stock)
 
-    #view.show_stock_graph()
+    view.show_stock_graph()
 
-    stocks = get_sp500_stocks()
-
-    for stock in stocks:
-        print(stock)
 
 
 if __name__ == '__main__':
