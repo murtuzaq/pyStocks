@@ -1,6 +1,8 @@
 import csv
 
 
+# https://www.nasdaq.com/market-activity/stocks/screener
+
 class StockDescription:
     def __init__(self,
                  symbol=None,
