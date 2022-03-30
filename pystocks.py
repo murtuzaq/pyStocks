@@ -2,13 +2,14 @@ import pandas_datareader
 import datetime
 import matplotlib.pyplot as plt
 import bs4 as bs
-import pickle
 import requests
 import os
-from enum import Enum
-
+import StockNasdaq
 STOCK_TYPE_SP500 = 0
 STOCK_TOTAL_TYPE = 1
+
+
+
 
 
 class StockInfo:
@@ -101,14 +102,22 @@ class StockList:
 
 
 def main():
-    stock_list = StockList()
-    stocks = stock_list.get_sp500_stocks()
+    stock_filter = StockNasdaq.StockFilter()
+    stock_filter.reset_filter()
+    stock_filter.filter_by_country("United States")
+    stock_filter.filter_by_sector("Technology")
 
-    stock = StockInfo(stocks[55])
-    view = StockView(stockinfo=stock)
+    filtered_list = stock_filter.get_filtered_list()
+    for stock in filtered_list:
+        print(stock.symbol, stock.name, stock.country, stock.sector, stock.industry)
 
-    view.show_stock_graph()
+    #stock_list = StockList()
+    #stocks = stock_list.get_sp500_stocks()
 
+    #stock = StockInfo(stocks[55])
+    #view = StockView(stockinfo=stock)
+
+    #view.show_stock_graph()
 
 
 if __name__ == '__main__':
