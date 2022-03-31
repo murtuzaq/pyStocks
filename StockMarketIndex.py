@@ -4,6 +4,7 @@ import os
 
 STOCK_TYPE_SP500 = 0
 STOCK_INDEX_DOWJONES = 1
+STOCK_TOTAL_TYPE = 2
 
 STOCK_LIST_TYPE = ['sp500', 'DowJones']
 STOCK_LIST_WEB_LINK = ['http://en.wikipedia.org/wiki/List_of_S%26P_500_companies',
